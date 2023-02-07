@@ -43,16 +43,99 @@ function App() {
         }
       }).then(retorno => retorno.json())
         .then(retorno_convertido =>{
-          console.log(retorno_convertido)
+
+          if(retorno_convertido.msg !== undefined){
+            alert(retorno_convertido.msg);
+          }else{
+            setProdutos([...produtos, retorno_convertido])
+            limparForm()
+            alert('Produto cadastrado com sucesso')
+          }
         })
+    }
+
+    //altera produto
+    const alterar = () =>{
+      fetch("http://localhost:8080/alterar",{
+        method:'put',
+        body:JSON.stringify(objProduto),
+        headers:{
+          'Content-type':'application/json',
+          'Accept':'application/json'
+        }
+      }).then(retorno => retorno.json())
+        .then(retorno_convertido =>{
+
+          if(retorno_convertido.msg !== undefined){
+            alert(retorno_convertido.msg);
+          }else{
+                        
+            alert('Produto alterado com sucesso')
+
+            let vetorTemp = [...produtos]
+
+            let indice = vetorTemp.findIndex((p)=>{
+               return p.id === objProduto.id
+            })
+            
+            vetorTemp[indice] = objProduto
+ 
+            setProdutos(vetorTemp);
+          
+            limparForm()
+          }
+        })
+    }
+
+
+      // remover
+    const remover = () =>{
+      fetch("http://localhost:8080/remover/"+objProduto.id,{
+        method:'delete',
+        headers:{
+          'Content-type':'application/json',
+          'Accept':'application/json'
+        }
+      }).then(retorno => retorno.json())
+        .then(retorno_convertido =>{
+
+            alert(retorno_convertido.msg) 
+
+           let vetorTemp = [...produtos]
+           let indice = vetorTemp.findIndex((p)=>{
+              return p.id === objProduto.id
+           })
+           
+           vetorTemp.splice(indice,1)
+
+           setProdutos(vetorTemp);
+           limparForm()
+
+        })
+    }
+
+    //limpar oformulario
+    const limparForm = ()=>{
+      setObjProduto(produto)
+      setBtnCadastrar(true)
+
+    }
+
+    //selecionar produto
+    const selecionarProduto = (indice) =>{
+      setObjProduto(produtos[indice])
+      setBtnCadastrar(false)
     }
 
 
   return (
     <div className='app'>
      
-       <Formulario botao={btnCadastrar} evento={dadosForm} cadastrar={cadastrar}/>
-      <Tabela vetor={produtos}/>
+       <Formulario botao={btnCadastrar} evento={dadosForm}
+        cadastrar={cadastrar} obj={objProduto}
+        cancelar={limparForm} remover={remover}
+        alterar={alterar}/>
+      <Tabela vetor={produtos} selecionar={selecionarProduto}/>
     </div>
   );
 }
